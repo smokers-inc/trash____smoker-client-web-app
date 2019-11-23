@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect} from 'react';
 import './App.css';
+import Env, {EnvDef} from "./env";
+import {Provider} from "react-redux";
+import store from "./redux/store";
+import Loadable from 'react-loadable';
+import {ReduxConnectorComponent} from "./redux/ReduxConnector";
+import {ThemeProvider} from "@material-ui/styles";
+import {DefaultTheme} from "./styles/theme";
+import {BrowserRouter, Route, Switch} from "react-router-dom";
+import Login from "./screens/login/Login";
 
 const App: React.FC = () => {
+  // 初期設定系の読み込みはここ
+  useEffect(() => {
+    Env.init(EnvDef.DEVELOPMENT);
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <ReduxConnectorComponent/>
+      <ThemeProvider theme={DefaultTheme}>
+        <BrowserRouter>
+          <Switch>
+            <Route exact={true} path={'/login'} component={Loadable({
+              loader: () => import('./screens/login/Login'),
+              loading: () => (<div/>),
+            })}/>
+            <Login/>
+            {/*
+            認証通った後の画面は下記でroutingする
+            <Auth>
+              <Route path={'/'} component={Layout}/>
+            </Auth>
+            */}
+          </Switch>
+        </BrowserRouter>
+      </ThemeProvider>
+    </Provider>
   );
-}
+};
 
 export default App;
